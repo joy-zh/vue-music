@@ -44,7 +44,7 @@
                 if( this.autoPlay ){
                     this._play();
                 }
-            },20)
+            },30)
             
             window.addEventListener('resize',() => {
                 if( !this.slider ){
@@ -110,6 +110,9 @@
                     this.slider.goToPage(pageIndex, 0, 400)
                 },this.interval)
             }
+        },
+        destroyed(){
+        	clearTimeout(this.timer);
         }
     }
 </script>
