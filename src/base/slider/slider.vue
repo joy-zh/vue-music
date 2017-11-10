@@ -37,14 +37,17 @@
         },
         mounted(){
             setTimeout(() => {
-                this._setSliderWidth();
+                
+            },20)
+            this.$nextTick(() => {
+            	this._setSliderWidth();
                 this._initDots();
                 this._initSlider();
                 
                 if( this.autoPlay ){
                     this._play();
                 }
-            },30)
+            })
             
             window.addEventListener('resize',() => {
                 if( !this.slider ){
@@ -80,10 +83,11 @@
                     scrollX: true,
                     scrollY: false,
                     momentum: false,
-                    snap: true,
-                    snapLoop: this.loop,
-                    snapThreshold: 0.3,
-                    snapSpeed: 400,
+                    snap: {
+                    	loop: this.loop,
+                    	threshold: 0.3,
+                    	speed: 300
+                    },
                     click: true
                 })
                 
@@ -121,7 +125,8 @@
   @import "~common/stylus/variable"
 
   .slider
-    min-height: 1px
+    min-height: 1px;
+    overflow:hidden;
     .slider-group
       position: relative
       overflow: hidden

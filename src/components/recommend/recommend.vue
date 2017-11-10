@@ -12,7 +12,17 @@
             </div>
             <div class="recommend-list">
                 <h1 class="list-title">热门歌单推荐</h1>
-                <ul></ul>
+                <ul>
+                	<li v-for="(item,index) in discList" class="item">
+                		<div class="icon">
+                			<img :src="item.cover.replace('600','90')" width="60" height="60" />
+                		</div>
+                		<div class="text">
+                			<h2 class="name"></h2>
+                			<p class="desc"></p>
+                		</div>
+                	</li>
+                </ul>
             </div>
         </div>
         <router-view></router-view>
@@ -26,7 +36,8 @@
     export default {
         data() {
             return {
-                recommends : []
+                recommends: [],
+                discList: []
             }
         },
         created(){
@@ -45,8 +56,8 @@
             _getDiscList(){
             	getDiscList().then((res) => {
                     if( res.code === ERR_OK ){
-//                      this.recommends = res.data.slider;
-//                      console.log(res);
+                        this.discList = res.new_song.data.song_list;
+                        console.log(this.discList);
                     }
                 })
             }
