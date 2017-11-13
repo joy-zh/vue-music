@@ -1,38 +1,45 @@
 <template>
     <div class="recommend">
-        <div class="recommend-content">
-            <div v-if="recommends.length" class="slider-wrapper">
-                <slider>
-                    <div v-for="(item,index) in recommends">
-                        <a :href="item.linkUrl">
-                            <img :src="item.picUrl" />
-                        </a>
-                    </div>
-                </slider>
-            </div>
-            <div class="recommend-list">
-                <h1 class="list-title">热门歌单推荐</h1>
-                <ul>
-                	<li v-for="(item,index) in discList" class="item">
-                		<div class="icon">
-                			<img :src="item.cover.replace('600','90')" width="60" height="60" />
-                		</div>
-                		<div class="text">
-                			<h2 class="name"></h2>
-                			<p class="desc"></p>
-                		</div>
-                	</li>
-                </ul>
-            </div>
-        </div>
+        <scroll class="recommend-content" :data='discList' refs="scroll">
+        	<div>
+        		<div v-if="recommends.length" class="slider-wrapper">
+	                <slider>
+	                    <div v-for="(item,index) in recommends">
+	                        <a :href="item.linkUrl">
+	                            <img @onload='loadImg' :src="item.picUrl" />
+	                        </a>
+	                    </div>
+	                </slider>
+	            </div>
+	            <div class="recommend-list">
+	                <h1 class="list-title">热门歌单推荐</h1>
+	                <ul>
+	                	<li v-for="(item,index) in discList" class="item">
+	                		<div class="icon">
+	                			<img v-lazy="item.imgurl.replace('600','90')" width="60" height="60" />
+	                		</div>
+	                		<div class="text">
+	                			<h2 class="name" v-html="item.creator.name"></h2>
+	                			<p class="desc" v-html="item.dissname"></p>
+	                		</div>
+	                	</li>
+	                </ul>
+	            </div>
+        	</div>
+        	<div class="loading-container" v-show="!discList.length">
+        		<loading></loading>
+        	</div>
+        </scroll>
         <router-view></router-view>
     </div>
 </template>
 <script type="text/javascript">
     import Slider from 'base/slider/slider'
+    import Scroll from 'base/scroll/scroll'
     import {getRecommend} from 'api/recommend'
     import {getDiscList} from 'api/recommend'
     import {ERR_OK} from 'api/config'
+    import Loading from 'base/loading/loading'
     export default {
         data() {
             return {
@@ -56,14 +63,22 @@
             _getDiscList(){
             	getDiscList().then((res) => {
                     if( res.code === ERR_OK ){
-                        this.discList = res.new_song.data.song_list;
-                        console.log(this.discList);
+                        this.discList = res.data.list;
+//                      console.log(res);
                     }
                 })
+            },
+            loadImg(){
+            	if( !this.checkLoaded ){
+            		this.$refs.scroll.refresh();
+            		this.checkLoaded = true;
+            	}
             }
         },
         components: {
-            Slider
+            Slider,
+            Scroll,
+            Loading
         }
     }
 </script>
