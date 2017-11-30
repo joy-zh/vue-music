@@ -1,5 +1,11 @@
 <template>
-	<scroll class="listview" :data='data' ref="listview">
+	<scroll class="listview" 
+		:data='data' 
+		ref="listview" 
+		:listenScroll="listenScroll"
+		@scroll="scroll"
+		:probeType="probeType"
+		>
 		<ul>
 			<li v-for="group in data" class="list-group" ref="listGroup">
 				<h2 class="list-group-title">{{group.title}}</h2>
@@ -13,10 +19,13 @@
 		</ul>
 		<div class="list-shortcut" @touchstart="onShortcutTouchStart($event)" @touchmove.stop.prevent="onShortcutTouchMove($event)">
 			<ul>
-				<li v-for="(item,index) in shortcutlist" class="item" :data-index="index" >
+				<li v-for="(item,index) in shortcutlist" class="item" :class="{'current':currentIndex === index}" :data-index="index" >
 					{{item}}
 				</li>
 			</ul>
+		</div>
+		<div class="list-fixed">
+			<h1 class="fixed-title">{{fixedTitle}}</h1>
 		</div>
 	</scroll>
 </template>
@@ -33,15 +42,47 @@
 				default:[]
 			}
 		},
+		data(){
+			return {
+				scrollY: -1,
+				currentIndex: 0
+			}
+		},
+		watch: {
+			data() {
+				setTimeout(() => {
+					this._calculateHeight()
+				},20)
+			},
+			scrollY(newY){
+				const listHeight = this.listHeight;
+				for( let i = 0; i < listHeight.length; i++ ){
+					var h1 = listHeight[i];
+					var h2 = listHeight[i+1];
+					if( !h2 || ( (-newY) >= h1 && (-newY) < h2 ) ){
+						this.currentIndex = i;
+						return;
+					}
+				}
+				
+				this.currentIndex = 0;
+			}
+		},
 		computed: {
 			shortcutlist(){
 				return this.data.map((group) => {
 					return group.title.substring(0, 1);
 				})
+			},
+			fixedTitle(){
+				return this.data[this.currentIndex] ? this.data[this.currentIndex].title : ''
 			}
 		},
 		created(){
 			this.touch = {};
+			this.listenScroll = true;
+			this.listHeight = [];
+			this.probeType = 3;
 		},
 		methods: {
 			onShortcutTouchStart(e){
@@ -49,7 +90,8 @@
 				let firstTouch = e.touches[0];
 				this.touch.anthorIndex = authorIndex;
 				this.touch.y1 = firstTouch.pageY;
-				this.$refs.listview.scrollToElement(this.$refs.listGroup[authorIndex],0)
+				
+				this._scrollTo(authorIndex)
 			},
 			onShortcutTouchMove(e){
 				let firstTouch = e.touches[0];
@@ -57,7 +99,35 @@
 				let delta = (this.touch.y2 - this.touch.y1)/ANTHOR_HEIGHT | 0;
 				let authorIndex = parseInt(this.touch.anthorIndex) + delta;
 				
-				this.$refs.listview.scrollToElement(this.$refs.listGroup[authorIndex],0)
+				this._scrollTo(authorIndex)
+			},
+			scroll(pos){
+				this.scrollY = pos.y;
+			},
+			_scrollTo(index){
+				if( !index && index !==0 ){
+					return;
+				}
+				
+				if( index < 0 ){
+					index = 0;
+				}else if( index > this.listHeight.length - 2 ){
+					index = this.listHeight.length - 2
+				}
+				
+				this.scrollY = -this.listHeight[index];
+				this.$refs.listview.scrollToElement(this.$refs.listGroup[index],0)
+			},
+			_calculateHeight(){
+				this.listHeight = [];
+				const list = this.$refs.listGroup;
+				let height = 0;
+				this.listHeight.push(height);
+				for( let i=0;i<list.length;i++ ){
+					let item = list[i];
+					height += item.clientHeight;
+					this.listHeight.push( height );
+				}
 			}
 		},
 		components: {
