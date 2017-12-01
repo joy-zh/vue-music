@@ -24,17 +24,23 @@
 				</li>
 			</ul>
 		</div>
-		<div class="list-fixed">
+		<div class="list-fixed" v-show="fixedTitle" ref="fixed">
 			<h1 class="fixed-title">{{fixedTitle}}</h1>
 		</div>
+		
+		<div class="loading-container" v-show="!data.length">
+    		<loading></loading>
+    	</div>
 	</scroll>
 </template>
 
 <script>
 	const ANTHOR_HEIGHT = 18;
+	const TITLE_HEIGHT = 30;
 	
 	import Scroll from 'base/scroll/scroll'
 	import {getData} from 'common/js/dom'
+	import Loading from 'base/loading/loading'
 	export default {
 		props: {
 			data: {
@@ -45,7 +51,8 @@
 		data(){
 			return {
 				scrollY: -1,
-				currentIndex: 0
+				currentIndex: 0,
+				diff: -1
 			}
 		},
 		watch: {
@@ -61,11 +68,20 @@
 					var h2 = listHeight[i+1];
 					if( !h2 || ( (-newY) >= h1 && (-newY) < h2 ) ){
 						this.currentIndex = i;
+						this.diff = h2 + newY;
 						return;
 					}
 				}
 				
 				this.currentIndex = 0;
+			},
+			diff(newVal){
+				let fixedTop = (newVal > 0 && newVal < TITLE_HEIGHT) ? (newVal-TITLE_HEIGHT) : -1
+				if( this.fixedTop === fixedTop ){
+					return;
+				}
+				this.fixedTop = fixedTop
+				this.$refs.fixed.style.transform = `translate3d(0,${fixedTop}px,0)`
 			}
 		},
 		computed: {
@@ -75,6 +91,10 @@
 				})
 			},
 			fixedTitle(){
+				if( this.scrollY > 0 ){
+					this.currentIndex = 0;
+					return '';
+				}
 				return this.data[this.currentIndex] ? this.data[this.currentIndex].title : ''
 			}
 		},
@@ -131,7 +151,8 @@
 			}
 		},
 		components: {
-			Scroll
+			Scroll,
+			Loading
 		}
 	}
 </script>
@@ -187,7 +208,7 @@
           color: $color-theme
     .list-fixed
       position: absolute
-      top: 0
+      top: -1px
       left: 0
       width: 100%
       .fixed-title
