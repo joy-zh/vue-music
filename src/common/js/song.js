@@ -1,0 +1,47 @@
+export default class Song{
+	/*
+	 * id: songid
+	 * mid: songmid
+	 * singer: 歌手
+	 * name: songname
+	 * album: 专辑名
+	 * duration: 歌曲长度
+	 * img: 歌曲图片
+	 * url: 歌曲请求路径
+	 */
+	constructor({id, mid, singer, name, album, duration, image, url}){
+		this.id = id
+		this.mid = mid
+		this.singer = singer
+		this.name = name
+		this.album = album
+		this.duration = duration
+		this.image = image
+		this.url = url
+	}
+}
+
+export function createSong(musicData){
+	return new Song({
+		id: musicData.songid,
+		mid: musicData.songmid,
+		singer: filterSinger(musicData.singer),
+		name: musicData.songname,
+		album: musicData.albumname,
+		duration: musicData.interval,
+		image: `//y.gtimg.cn/music/photo_new/T002R300x300M000${musicData.albummid}.jpg?max_age=2592000`,
+		url: `http://dl.stream.qqmusic.qq.com/C400${musicData.songmid}.m4a?vkey=54922C333DEB7EB55B4D04FBFD6BE39B5A5EDBF532CE07F36B52115ABDCDA8B2D360F9385FDEA88CD69A9F7FF22903BC576B95EDE733AF29&guid=4865358300&uin=0&fromtag=66`
+	})
+}
+
+function filterSinger(singer){
+	let ret = []
+	if( !singer ){
+		return ''
+	}
+	singer.forEach((item) => {
+		ret.push(item.name)
+	})
+	
+	return ret.join('/')
+}
