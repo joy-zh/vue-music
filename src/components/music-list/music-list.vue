@@ -5,9 +5,10 @@
 		</div>
 		<h1 class="title" v-html="title"></h1>
 		<div class="bg-image" :style="bgStyle" ref="bgImage">
-			<div class="filter"></div>
+			<div class="filter" ref="filter"></div>
 		</div>
-		<scroll :data="songs" class="list" ref="list">
+		<div class="bg-layer" ref="layer"></div>
+		<scroll @scroll='scroll' :data="songs" :probe-type="probeType" :listen-scroll="listenScroll" class="list" ref="list">
 			<div class="song-list-wrapper">
 				<song-list :songs="songs"></song-list>
 			</div>
@@ -19,6 +20,7 @@
 <script type='text/ecmascript-6'>
 	import Scroll from 'base/scroll/scroll'
 	import SongList from 'base/song-list/song-list'
+	const HEAD_HEIGHT = 40
 	export default {
 		props: {
 			bgImage: {
@@ -34,11 +36,56 @@
 				default: ''
 			}
 		},
+		data(){
+			return {
+				scrollY: 0
+			}
+		},
 		created() {
-			console.log(this.bgImage)
+			this.probeType = 3
+			this.listenScroll = true
 		},
 		mounted() {
-			this.$refs.list.$el.style.top = `${this.$refs.bgImage.clientHeight}px`
+			this.imageHeight = this.$refs.bgImage.clientHeight
+			this.minTranslateY = -this.imageHeight + HEAD_HEIGHT
+			this.$refs.list.$el.style.top = `${this.imageHeight}px`
+		},
+		watch: {
+			scrollY(newY){
+				let translateY = Math.max(this.minTranslateY, newY)
+				let zIndex = -10
+				let scale = 1
+				let blur = 0
+				this.$refs.layer.style['transform'] = `translate3d(0,${translateY}px,0)`
+				this.$refs.layer.style['webkitTransform'] = `translate3d(0,${translateY}px,0)`
+				
+				if( newY < this.minTranslateY ){
+					zIndex = 10
+					this.$refs.bgImage.style.paddingTop = 0
+					this.$refs.bgImage.style.height = `${HEAD_HEIGHT}px`
+				} else {
+					this.$refs.bgImage.style.paddingTop = '70%'
+					this.$refs.bgImage.style.height = '0px'
+				}
+				
+				const percent = Math.abs(newY / this.imageHeight)
+				if( newY > 0 ){
+					scale = 1 + percent
+					zIndex = 10
+				}else{
+					blur = Math.min(20 * percent, 20)
+				}
+				this.$refs.bgImage.style['transform'] = `scale(${scale})`
+				this.$refs.bgImage.style['webkitTransform'] = `scale(${scale})`
+				this.$refs.bgImage.style.zIndex = zIndex
+				this.$refs.filter.style['backdrop-filter'] = `blur(${blur}px)`
+				this.$refs.filter.style['webkitBackdrop-filter'] = `blur(${blur}px)`
+			}
+		},
+		methods: {
+			scroll(pos){
+				this.scrollY = pos.y
+			}
 		},
 		computed: {
 			bgStyle() {
@@ -92,6 +139,7 @@
       padding-top: 70%
       transform-origin: top
       background-size: cover
+      z-index:-10
       .play-wrapper
         position: absolute
         bottom: 20px
@@ -127,6 +175,7 @@
       position: relative
       height: 100%
       background: $color-background
+      z-index:-1
     .list
       position: fixed
       top: 0
