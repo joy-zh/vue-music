@@ -14,7 +14,6 @@
 </template>
 
 <script type="text/ecmascript-6">
-	const PROGRESS_BTN_WIDTH = 16
 	import {prefixStyle} from 'common/js/dom'
 	const transform = prefixStyle('transform')
 	export default {
@@ -30,7 +29,7 @@
 		watch: {
 			percent(newPercent){
 				if(newPercent > 0 && !this.touch.initial){
-					const barWidth = this.$refs.progressBar.clientWidth - PROGRESS_BTN_WIDTH
+					const barWidth = this.$refs.progressBar.clientWidth
 					const offsetWidth = newPercent * barWidth
 					this._offset(offsetWidth)
 				}
@@ -55,7 +54,9 @@
 				this._triggerPercent()
 			},
 			progressBarClick(e){
-				this._offset(e.offsetX)
+				const rect = this.$refs.progressBar.getBoundingClientRect()
+				const offsetWidth = e.pageX - rect.left - this.$refs.progressBtn.clientWidth / 2
+				this._offset(offsetWidth)
 				this._triggerPercent()
 			},
 			_offset(offsetWidth){
@@ -63,7 +64,7 @@
 				this.$refs.progressBtn.style[transform] = `translate3d(${offsetWidth}px, 0, 0)`
 			},
 			_triggerPercent(){
-				const barWidth = this.$refs.progressBar.clientWidth - PROGRESS_BTN_WIDTH
+				const barWidth = this.$refs.progressBar.clientWidth
 				const percent = this.$refs.progress.clientWidth / barWidth
 				this.$emit('percentChange', percent)
 			}
@@ -94,7 +95,7 @@
         .progress-btn
           position: relative
           top: 7px
-          left: 7px
+          /*left: 7px*/
           box-sizing: border-box
           width: 16px
           height: 16px

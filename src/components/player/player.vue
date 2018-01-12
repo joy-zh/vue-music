@@ -74,7 +74,12 @@
 				</div>
 			</div>
 		</transition>
-		<audio :src="currentSong.url" ref='audio' @canplay="ready" @error="error" @timeupdate="updateTime"></audio>
+		<audio :src="currentSong.url" ref='audio' 
+			@canplay="ready"
+			@error="error"
+			@timeupdate="updateTime"
+			@ended="end"
+		></audio>
 	</div>
 </template>
 
@@ -86,6 +91,7 @@
 	import ProgressCircle from 'base/progress-circle/progress-circle'
 	import {playMode} from 'common/js/config'
 	import {shuffle} from 'common/js/util'
+	import Lyric from 'lyric-parser'
 	
 	const transform = prefixStyle('transform')
 	export default {
@@ -93,7 +99,8 @@
 			return {
 				songReady: false,
 				currentTime: 0,
-				radius: 32
+				radius: 32,
+				currentLyric: null
 			}
 		},
 		computed: {
@@ -140,6 +147,7 @@
 				const audio = this.$refs.audio
 				this.$nextTick(() => {
 					newPlaying ? audio.play() : audio.pause()
+					this.getLyric()
 				})
 			}
 		},
@@ -207,6 +215,17 @@
 					return
 				}
 				this.setPlayingState(!this.playing)
+			},
+			end(){
+				if(this.mode === playMode.loop){
+					this.loop()
+				}else{
+					this.next()
+				}
+			},
+			loop(){
+				this.$refs.audio.currentTime = 0
+				this.$refs.audio.play()
 			},
 			next(){
 				if(!this.songReady){
@@ -277,6 +296,11 @@
 					return item.id === this.currentSong.id
 				})
 				this.setCurrentIndex(index)
+			},
+			getLyric(){
+				this.currentSong.getLyric().then((lyric) => {
+					this.currentLyric = new Lyric(lyric)
+				})
 			}
 			,...mapMutations({
 				setFullScreen:'SET_FULL_SCREEN',
@@ -443,9 +467,9 @@
             &.time-r
               text-align: right
             &.left
-              padding-right: 5px
+              padding-right: 10px
             &.right
-              padding-left: 5px
+              padding-left: 10px
           .progress-bar-wrapper
             flex: 1
         .operators
