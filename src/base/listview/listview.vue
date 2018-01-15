@@ -108,6 +108,9 @@
 			selectItem(item){
 				this.$emit("select",item)
 			},
+			refresh(){
+				this.$refs.listview.refresh()
+			},
 			onShortcutTouchStart(e){
 				let authorIndex = getData(e.target,'index');
 				let firstTouch = e.touches[0];
