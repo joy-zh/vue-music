@@ -7,38 +7,41 @@
 <script type="text/ecmascript-6">
 	import MusicList from 'components/music-list/music-list'
 	import {mapGetters} from 'vuex'
-	import {getSongList} from 'api/recommend'
+	import {getMusicList} from 'api/rank'
 	import {ERR_OK} from 'api/config'
 	import {createSong} from 'common/js/song'
 	export default {
+		computed: {
+			title(){
+				return this.topList.topTitle
+			},
+			bgImage(){
+				if(this.songs.length){
+					return this.songs[0].image
+				}
+				return this.topList.picUrl
+			}
+			,...mapGetters([
+				'topList'
+			])
+		},
 		data(){
 			return {
 				songs: []
 			}
 		},
-		computed: {
-			title() {
-				return this.disc.dissname
-			},
-			bgImage() {
-				return this.disc.imgurl
-			}
-			,...mapGetters([
-				'disc'
-			])
-		},
 		created(){
-			this._getSongList()
+			this._getMusicList()
 		},
 		methods: {
-			_getSongList(){
-				if(!this.disc.dissid){
-					this.$router.push('/recommend')
+			_getMusicList(){
+				if(!this.topList.id){
+					this.$router.push('/rank')
 					return
 				}
-				getSongList(this.disc.dissid).then((res) => {
+				getMusicList(this.topList.id).then((res) => {
 					if(res.code === ERR_OK){
-						this.songs = this._normalizeSongs(res.cdlist[0].songlist)
+						this.songs = this._normalizeSongs(res.songlist)
 					}
 				})
 			},
@@ -46,8 +49,8 @@
 				let ret = []
 
 				list.forEach((item) => {
-					if(item.songid && item.albumid){
-						ret.push(createSong(item))
+					if(item.data.songid && item.data.albumid){
+						ret.push(createSong(item.data))
 					}
 				})
 				return ret
