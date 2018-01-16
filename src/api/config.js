@@ -5,7 +5,7 @@
 * @Last Modified time: 2017-09-01 14:19:32
 */
 export const commonParams = {
-    g_tk : 298944863,
+    g_tk : 5381,
     format : 'jsonp',
     inCharset: 'utf-8',
     outCharset: 'utf-8',

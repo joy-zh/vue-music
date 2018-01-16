@@ -62,6 +62,32 @@ apiRoutes.get("/lyric", function(req,res){
   })
 })
 
+// 歌单歌曲列表
+apiRoutes.get("/getDiscSongList", function(req,res){
+	var url = 'https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg'
+  axios.get(url, {
+    headers: {
+      referer: 'https://c.y.qq.com/',
+      host: 'c.y.qq.com'
+    },
+    params: req.query
+  }).then((response) => {
+//	var ret = response.data
+//	if(typeof ret === 'string'){
+//		var reg = /^\w+\(({[^()]+})\)$/
+//    var matches = ret.match(reg)
+//    if (matches) {
+//      ret = JSON.parse(matches[1])
+//    }
+//	}
+		var str = response.data
+		str = str.substring(str.indexOf("{"),str.lastIndexOf(")"))
+    res.json(JSON.parse(str))
+  }).catch((e) => {
+    console.log(e)
+  })
+})
+
 app.use('/api',apiRoutes)
 
 var compiler = webpack(webpackConfig)
