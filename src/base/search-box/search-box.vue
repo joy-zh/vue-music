@@ -1,14 +1,24 @@
 <template>
 	<div class="search-box">
 		<i class="icon-search"></i>
-		<input class="box" />
+		<input class="box" :placeholder="placeHolder" v-model="query" />
 		<i class="icon-dismiss"></i>
 	</div>
 </template>
 
 <script type="text/ecmascript-6">
 	export default {
-		
+		props: {
+			placeHolder: {
+				type: String,
+				default: '搜索歌曲、歌手'
+			}
+		},
+		data(){
+			return {
+				query: ''
+			}
+		}
 	}
 </script>
 
