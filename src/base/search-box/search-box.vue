@@ -2,7 +2,7 @@
 	<div class="search-box">
 		<i class="icon-search"></i>
 		<input class="box" :placeholder="placeHolder" v-model="query" />
-		<i class="icon-dismiss"></i>
+		<i @click="clear" class="icon-dismiss" v-show="query"></i>
 	</div>
 </template>
 
@@ -18,6 +18,19 @@
 			return {
 				query: ''
 			}
+		},
+		created(){
+			this.$watch('query',(newQuery) => {
+				this.$emit('query', newQuery)
+			})
+		},
+		methods: {
+			clear(){
+				this.query = ''
+			},
+			setQuery(query){
+				this.query = query
+			}
 		}
 	}
 </script>
@@ -26,11 +39,12 @@
 @import "~common/stylus/variable"
 
   .search-box
+    position:relative
     display: flex
     align-items: center
     box-sizing: border-box
     width: 100%
-    padding: 0 6px
+    padding: 0 22px 0 6px
     height: 40px
     background: $color-highlight-background
     border-radius: 6px
@@ -47,6 +61,8 @@
       &::placeholder
         color: $color-text-d
     .icon-dismiss
+      position: absolute;
+      right: 6px;
       font-size: 16px
       color: $color-background
 </style>
