@@ -14,8 +14,34 @@
 </template>
 
 <script type="text/ecmascript-6">
+	import {search} from 'api/search'
+	
 	export default {
-		
+		props: {
+			query: {
+				type: String,
+				default: ''
+			},
+			showSinger: {
+				type: Boolean,
+				default: true
+			}
+		},
+		data(){
+			return {
+				page: 1
+			}
+		},
+		watch: {
+			query(newVal) {
+				this.search()
+			}
+		},
+		methods: {
+			search() {
+				search(this.query, this.page, this.showSinger)
+			}
+		}
 	}
 </script>
 
