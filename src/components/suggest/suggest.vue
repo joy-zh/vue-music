@@ -3,7 +3,9 @@
 		class="suggest" 
 		:data="result" 
 		:pullup="pullup"
+		:beforeScroll="beforeScroll"
 		@scrollToEnd="searchMore"
+		@beforeScroll="listScroll"
 		ref="suggestScroll"
 		>
 		<ul class="suggest-list">
@@ -17,6 +19,9 @@
 			</li>
 			<loading v-show="hasMore"></loading>
 		</ul>
+		<div class="no-result-wrapper" v-show="!hasMore && !result.length">
+			<no-result title="抱歉，暂无相关数据"></no-result>
+		</div>
 	</scroll>
 </template>
 
@@ -27,7 +32,9 @@
 	import Scroll from 'base/scroll/scroll'
 	import Loading from 'base/loading/loading'
 	import Singer from 'common/js/singer'
-	import {mapMutations} from 'vuex'
+	import {mapMutations, mapActions} from 'vuex'
+	import NoResult from 'base/no-result/no-result' 
+	
 	const TYPE_SINGER = "singer"
 	const perpage = 20
 	
@@ -47,7 +54,8 @@
 				page: 1,
 				result: [],
 				pullup: true,
-				hasMore: true
+				hasMore: true,
+				beforeScroll: true
 			}
 		},
 		watch: {
@@ -108,7 +116,13 @@
 						path: `/search/${singer.id}`
 					})
 					this.setSinger(singer)
+				}else{
+					this.insertSong(item)
 				}
+				this.$emit('select')
+			},
+			listScroll() {
+				this.$emit("listScroll")
 			},
 			_getResult(data){
 				let ret = []
@@ -137,11 +151,15 @@
 			}
 			,...mapMutations({
 				setSinger: 'SET_SINGER'
-			})
+			}),
+			...mapActions([
+				'insertSong'
+			])
 		},
 		components: {
 			Scroll,
-			Loading
+			Loading,
+			NoResult
 		}
 	}
 </script>
@@ -175,6 +193,6 @@
     .no-result-wrapper
       position: absolute
       width: 100%
-      top: 50%
-      transform: translateY(-50%)
+      top: 40%
+      transform: translateY(-40%)
 </style>
