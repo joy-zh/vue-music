@@ -71,7 +71,6 @@
 				this.page = 1
 				this.$refs.suggestScroll.scrollTo(0, 0)
 				search(this.query, this.page, this.showSinger, perpage).then((res) => {
-					console.log("search")
 					if(res.code === ERR_OK){
 						this.result = this._getResult(res.data)
 						this._checkMore(res.data)

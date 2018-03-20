@@ -1,4 +1,5 @@
 import {playMode} from 'common/js/config'
+import {loadSearch} from 'common/js/cache'
 const state = {
 	singer: {},
 	playing: false, //播放 暂停
@@ -9,7 +10,7 @@ const state = {
 	currentIndex: -1,  //当前播放
 	disc: {},    //歌单
 	topList: {},  //排行榜列表
-	searchHistory: [] //历史记录
+	searchHistory: loadSearch() //历史记录
 	
 }
 
